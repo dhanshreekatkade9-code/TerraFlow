@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>TerraFlow | Smart Irrigation & Crop Water Advisor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       04 OCEAN & MINT — FRESH CLIMATE TECH PALETTE
+       ========================================================================== */
+    :root {
+      --deep-teal: #124C4A;   /* Navigation & primary actions */
+      --teal: #278C82;        /* Water-related actions & metrics */
+      --mint: #75C8B4;        /* Water-level indicators & highlights */
+      --aqua: #D9F0E8;        /* Chart panels, login split panel & soft surfaces */
+      --snow: #F4FAF7;        /* Main light canvas background */
+      --ink: #263A3A;         /* High-contrast body & heading text */
+      --sun: #E6C878;         /* Caution / medium confidence / temperature */
+      --coral: #D98768;       /* Heatwave / dry stress alert */
+      --white: #FFFFFF;
+      --border: #C4E3D9;
+      --muted: #526C6C;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --shadow: 0 8px 26px rgba(18, 76, 74, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', sans-serif;
+      background-color: var(--snow);
+      color: var(--ink);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* SCREEN VIEW MANAGEMENT */
+    .screen-view {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .screen-view.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseHighlight {
+      0% { box-shadow: 0 0 0 0 rgba(39, 140, 130, 0.7); transform: scale(1); }
+      40% { box-shadow: 0 0 0 14px rgba(39, 140, 130, 0); transform: scale(1.01); }
+      100% { box-shadow: 0 0 0 0 rgba(39, 140, 130, 0); transform: scale(1); }
+    }
+
+    .pulse-updated {
+      animation: pulseHighlight 1.2s ease-out 2;
+    }
+
+    /* GLOBAL BUTTONS & INPUTS */
+    .btn-primary {
+      background: var(--deep-teal);
+      color: var(--white);
+      border: none;
+      padding: 13px 24px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--teal);
+      transform: translateY(-1px);
+    }
+
+    .btn-teal {
+      background: var(--teal);
+      color: var(--white);
+      border: none;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-teal:hover {
+      background: var(--deep-teal);
+    }
+
+    .btn-outline {
+      background: var(--white);
+      color: var(--deep-teal);
+      border: 1.5px solid var(--border);
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .btn-outline:hover {
+      border-color: var(--teal);
+      background: var(--aqua);
+    }
+
+    .input-control {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 11px;
+      border: 1.5px solid var(--border);
+      background: var(--snow);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .input-control:focus {
+      outline: none;
+      border-color: var(--teal);
+      background: var(--white);
+    }
+
+    /* ==========================================================================
+       SCREEN 1: STARTING / LANDING PAGE
+       ========================================================================== */
+    .landing-container {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 20px 20px 60px;
+    }
+
+    .landing-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0 32px;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--deep-teal);
+      cursor: pointer;
+    }
+
+    .brand-drop {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--teal), var(--mint));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-size: 1.15rem;
+    }
+
+    .landing-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-showcase {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      box-shadow: var(--shadow);
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 900px) {
+      .hero-showcase { grid-template-columns: 1fr; }
+    }
+
+    .hero-text-side {
+      padding: 52px 44px;
+      background: linear-gradient(180deg, var(--snow) 0%, var(--white) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    @media (max-width: 600px) {
+      .hero-text-side { padding: 32px 22px; }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      align-self: flex-start;
+      background: var(--aqua);
+      color: var(--deep-teal);
+      font-weight: 800;
+      font-size: 0.78rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .hero-text-side h1 {
+      font-size: clamp(2rem, 4vw, 2.85rem);
+      line-height: 1.12;
+      font-weight: 800;
+      color: var(--deep-teal);
+      margin-bottom: 14px;
+    }
+
+    .hero-tagline {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+
+    .hero-text-side p {
+      font-size: 0.98rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+      max-width: 500px;
+    }
+
+    .hero-image-side {
+      background:
+        linear-gradient(135deg, rgba(18, 76, 74, 0.18), rgba(39, 140, 130, 0.38)),
+        url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1100&q=80') center/cover no-repeat;
+      min-height: 400px;
+      padding: 26px;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .hero-live-glass {
+      background: rgba(244, 250, 247, 0.96);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--aqua);
+      border-radius: 16px;
+      padding: 18px 20px;
+      width: 100%;
+      box-shadow: 0 12px 30px rgba(18, 76, 74, 0.18);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .landing-features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 18px;
+    }
+
+    .feature-tile {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .feature-tile h3 {
+      font-size: 1rem;
+      color: var(--deep-teal);
+      margin-bottom: 6px;
+    }
+
+    .feature-tile p {
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    /* ==========================================================================
+       SCREEN 2: LOGIN / FARMER ONBOARDING PAGE
+       ========================================================================== */
+    .login-page-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background: var(--snow);
+    }
+
+    .login-card {
+      max-width: 900px;
+      width: 100%;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 780px) {
+      .login-card { grid-template-columns: 1fr; }
+    }
+
+    .login-aqua-side {
+      background: var(--aqua);
+      padding: 40px 32px;
+      color: var(--deep-teal);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .login-form-side {
+      padding: 42px 38px;
+      background: var(--white);
+    }
+
+    @media (max-width: 600px) {
+      .login-form-side { padding: 28px 22px; }
+    }
+
+    .form-row {
+      margin-bottom: 15px;
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 5px;
+    }
+
+    /* ==========================================================================
+       SCREEN 3: FARMER DASHBOARD (DESKTOP SIDEBAR + MOBILE BOTTOM NAV)
+       ========================================================================== */
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 255px 1fr;
+      min-height: 100vh;
+      background: var(--snow);
+    }
+
+    @media (max-width: 960px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+        padding-bottom: 76px; /* Space for mobile bottom nav */
+      }
+      .desktop-sidebar {
+        display: none !important;
+      }
+    }
+
+    /* DEEP-TEAL SIDEBAR (#124C4A) */
+    .desktop-sidebar {
+      background: var(--deep-teal);
+      color: var(--white);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      padding: 0 10px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.14);
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.84);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--white);
+    }
+
+    .nav-link.active {
+      background: var(--teal);
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    .sidebar-live-box {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(117, 200, 180, 0.35);
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+    }
+
+    /* MOBILE BOTTOM NAVIGATION BAR */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--deep-teal);
+      color: var(--white);
+      z-index: 150;
+      padding: 8px 6px;
+      box-shadow: 0 -4px 16px rgba(18, 76, 74, 0.2);
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    @media (max-width: 960px) {
+      .mobile-bottom-nav {
+        display: flex;
+      }
+    }
+
+    .mob-nav-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.75);
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    .mob-nav-btn.active {
+      color: var(--mint);
+    }
+
+    /* DASHBOARD CONTENT CONTAINER */
+    .dash-content {
+      padding: 24px 28px 50px;
+      max-width: 1220px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+      .dash-content { padding: 16px 14px 40px; }
+    }
+
+    /* DASHBOARD TOP HEADER BAR */
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .live-weather-pill {
+      background: var(--aqua);
+      color: var(--deep-teal);
+      border: 1px solid var(--mint);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* INTERACTIVE PROCESSING BANNER (SHOWN WHEN UPDATING) */
+    .update-progress-banner {
+      display: none;
+      background: var(--deep-teal);
+      color: var(--white);
+      padding: 14px 18px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .update-progress-banner.show {
+      display: flex;
+    }
+
+    /* TOP 4 LIVE METRIC CARDS */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .metric-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .info-tip {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--aqua);
+      color: var(--deep-teal);
+      font-size: 0.7rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: help;
+      position: relative;
+    }
+
+    .info-tip:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 125%;
+      right: 0;
+      width: 210px;
+      background: var(--deep-teal);
+      color: var(--white);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      z-index: 60;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    .metric-big {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--teal);
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+
+    .metric-unit {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .liquid-bar {
+      height: 8px;
+      background: var(--aqua);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 8px 0 6px;
+    }
+
+    .liquid-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--teal), var(--mint));
+      border-radius: 999px;
+      width: 33%;
+      transition: width 0.6s ease;
+    }
+
+    /* LARGE IRRIGATION RECOMMENDATION RESULT CARD */
+    .recommendation-hero {
+      background: var(--aqua);
+      border: 2px solid var(--mint);
+      border-radius: var(--radius-lg);
+      padding: 24px 26px;
+      margin-bottom: 22px;
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 20px;
+      align-items: center;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    @media (max-width: 820px) {
+      .recommendation-hero { grid-template-columns: 1fr; padding: 20px 18px; }
+    }
+
+    .updated-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--deep-teal);
+      color: var(--white);
+      font-size: 0.74rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .rec-main-action {
+      font-size: clamp(1.75rem, 3.5vw, 2.4rem);
+      font-weight: 800;
+      color: var(--deep-teal);
+      line-height: 1.12;
+      margin-bottom: 8px;
+    }
+
+    .rec-stats-strip {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .rec-depth-val {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--teal);
+    }
+
+    .rec-delta-banner {
+      background: #E4F7F0;
+      border-left: 4px solid var(--teal);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--deep-teal);
+      margin-bottom: 12px;
+    }
+
+    .rec-explanation-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .rec-trust-panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    /* AUDIO PLAYER CONTROLS BAR */
+    .audio-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .btn-audio-speak {
+      background: var(--deep-teal);
+      color: var(--white);
+      border: none;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.84rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-audio-speak.speaking {
+      background: var(--coral);
+    }
+
+    /* WHITE SECTION CARDS */
+    .section-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      margin-bottom: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 600px) {
+      .section-card { padding: 18px 16px; }
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .section-header h3 {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: var(--deep-teal);
+    }
+
+    .form-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+    }
+
+    /* AQUA CHART PANEL */
+    .aqua-charts-box {
+      background: var(--aqua);
+      border: 1px solid var(--mint);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      margin-bottom: 22px;
+    }
+
+    .charts-3col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .chart-mini-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+    }
+
+    .chart-mini-card h4 {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--deep-teal);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .chart-bar-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .chart-bar-line .d-name {
+      width: 44px;
+      color: var(--muted);
+    }
+
+    .chart-track {
+      flex: 1;
+      height: 9px;
+      background: var(--snow);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .chart-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+
+    /* RESPONSIVE TABLE */
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      min-width: 520px;
+    }
+
+    .comp-table th {
+      background: var(--aqua);
+      color: var(--deep-teal);
+      text-align: left;
+      padding: 11px 12px;
+      font-weight: 800;
+    }
+
+    .comp-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    .comp-table tr.selected-method {
+      background: #E8F8F3;
+      border-left: 4px solid var(--teal);
+    }
+
+    /* NUGEN AI CHAT INTERFACE */
+    .chat-messages {
+      background: var(--snow);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      height: 240px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bubble {
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      max-width: 86%;
+      line-height: 1.45;
+    }
+
+    .bubble.ai {
+      background: var(--aqua);
+      color: var(--ink);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble.user {
+      background: var(--deep-teal);
+      color: var(--white);
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .quick-prompts {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .prompt-chip {
+      background: var(--snow);
+      color: var(--deep-teal);
+      border: 1px solid var(--border);
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .prompt-chip:hover {
+      background: var(--aqua);
+    }
+
+    /* FARMER FEEDBACK SECTION */
+    .feedback-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .fb-tag {
+      background: var(--snow);
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .fb-tag.selected {
+      background: var(--teal);
+      color: var(--white);
+      border-color: var(--deep-teal);
+    }
+
+    /* MODAL FOR NUGEN API SETTINGS */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 76, 74, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--white);
+      border-radius: 20px;
+      max-width: 500px;
+      width: 100%;
+      padding: 26px;
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       SCREEN 1: STARTING / LANDING PAGE (DEFAULT ENTRY SCREEN)
+       ======================================================================== -->
+  <section class="screen-view active" id="screen-landing">
+    <div class="landing-container">
+      <header class="landing-header">
+        <div class="brand-logo" onclick="navigateTo('landing')">
+          <span class="brand-drop">💧</span> TerraFlow
+        </div>
+        <div class="landing-nav-links">
+          <select class="input-control" style="width:auto; padding:8px 12px;" id="landing-lang" onchange="changeLanguage(this.value)">
+            <option value="en">English (EN)</option>
+            <option value="mr">मराठी (Marathi)</option>
+            <option value="hi">हिंदी (Hindi)</option>
+          </select>
+          <button class="btn-outline" onclick="navigateTo('login')" id="t-nav-signin">Sign In</button>
+          <button class="btn-primary" onclick="navigateTo('login')" id="t-nav-start">Get Started →</button>
+        </div>
+      </header>
+
+      <div class="hero-showcase">
+        <div class="hero-text-side">
+          <span class="hero-badge" id="t-hero-badge">🌱 Live Weather Forecast & FAO-56 Water Balance</span>
+          <h1 id="t-hero-title">Water Intelligence for Smarter Farms.</h1>
+          <div class="hero-tagline" id="t-hero-sub">Know when to water. Know how much.</div>
+          <p id="t-hero-desc">
+            Uses live weather forecasts (Open-Meteo), the FAO-56 soil-water balance model, and Nugen AI explanations with browser voice in Marathi, Hindi, and English to conserve groundwater and reduce pumping costs.
+          </p>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <button class="btn-primary" onclick="navigateTo('login')" id="t-hero-cta1">Start Farm Advisory →</button>
+            <button class="btn-outline" onclick="quickDemoLogin()" id="t-hero-cta2">⚡ Instant Live Dashboard</button>
+          </div>
+        </div>
+
+        <div class="hero-image-side">
+          <div class="hero-live-glass">
+            <div>
+              <small style="font-weight:800; color:var(--teal); text-transform:uppercase;">Live Weather Forecast</small>
+              <div style="font-size:1.3rem; font-weight:800; color:var(--deep-teal);" id="landing-live-preview">
+                Fetching Live Weather...
+              </div>
+              <span style="font-size:0.8rem; color:var(--muted); font-weight:600;">
+                Open-Meteo forecast • ET₀ from forecast • Soil moisture estimated by model
+              </span>
+            </div>
+            <button class="btn-teal" onclick="navigateTo('login')">Enter Farm →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="landing-features-grid">
+        <div class="feature-tile">
+          <h3>🌦️ Live Weather Forecast & ET₀</h3>
+          <p>Live forecast from Open-Meteo (model output, not a local weather station) for temperature, rain probability, and FAO-56 evapotranspiration.</p>
+        </div>
+        <div class="feature-tile">
+          <h3>🔊 Voice & Audio in All Languages</h3>
+          <p>Listen to irrigation recommendations and converse with Nugen AI by voice in Marathi (मराठी), Hindi (हिंदी), and English.</p>
+        </div>
+        <div class="feature-tile">
+          <h3>🛠️ Full Manual Field Overrides</h3>
+          <p>Report local farm rainfall, hand-feel soil moisture, leaf stress, mulching, and 3-phase electricity timings for instant recalculation.</p>
+        </div>
+        <div class="feature-tile">
+          <h3>💧 Irrigation Method Comparison</h3>
+          <p>Compare Flood, Sprinkler, and Drip water volumes, pump hours, and electricity use side-by-side side-by-side.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       SCREEN 2: LOGIN / FARMER SETUP STARTING PAGE
+       ======================================================================== -->
+  <section class="screen-view" id="screen-login">
+    <div class="login-page-wrap">
+      <div class="login-card">
+        <div class="login-aqua-side">
+          <div>
+            <div class="brand-logo" style="margin-bottom:24px;" onclick="navigateTo('landing')">
+              <span class="brand-drop">💧</span> TerraFlow
+            </div>
+            <h2 style="font-size:1.6rem; font-weight:800; margin-bottom:12px;" id="t-login-side-title">
+              Right Water. Right Time. Resilient Farms.
+            </h2>
+            <p style="font-size:0.92rem; opacity:0.9;">
+              Sign in with your mobile number and select your farm location to fetch live online weather, evapotranspiration (ET₀), and personalized crop water advice.
+            </p>
+          </div>
+          <div style="font-size:0.82rem; font-weight:700; line-height:1.7;">
+            ✔ Live Open-Meteo & FAO-56 Agronomy<br/>
+            ✔ Audio Guidance in मराठी, हिंदी & English<br/>
+            ✔ Works on Mobile & Desktop
+          </div>
+        </div>
+
+        <div class="login-form-side">
+          <h2 style="font-size:1.65rem; font-weight:800; color:var(--deep-teal); margin-bottom:4px;" id="t-login-welcome">
+            Welcome Farmer
+          </h2>
+          <p style="font-size:0.88rem; color:var(--muted); margin-bottom:20px;" id="t-login-sub">
+            Enter your details to load live weather and soil intelligence for your farm
+          </p>
+
+          <div class="form-row">
+            <label id="t-lbl-lang">Select Language (भाषा निवडा / भाषा चुनें)</label>
+            <select class="input-control" id="login-lang" onchange="changeLanguage(this.value)">
+              <option value="en">English (EN)</option>
+              <option value="mr">मराठी (Marathi)</option>
+              <option value="hi">हिंदी (Hindi)</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label id="t-lbl-name">Farmer Name (शेतकऱ्याचे नाव)</label>
+            <input type="text" class="input-control" id="login-name" value="Ramesh Patil" placeholder="Enter your name" />
+          </div>
+
+          <div class="form-row">
+            <label id="t-lbl-phone">Mobile Number (मोबाईल नंबर)</label>
+            <input type="tel" class="input-control" id="login-phone" value="+91 98230 45120" placeholder="+91 XXXXX XXXXX" />
+          </div>
+
+          <div class="form-row">
+            <label id="t-lbl-init-loc">Primary Farm Location (District / Weather Station)</label>
+            <select class="input-control" id="login-location">
+              <option value="18.5204,73.8567,Pune">Pune (Haveli / Baramati)</option>
+              <option value="19.9975,73.7898,Nashik" selected>Nashik (Niphad / Lasalgaon)</option>
+              <option value="19.3919,74.6487,Rahuri (Ahilyanagar)">Rahuri / Ahilyanagar (MPKV)</option>
+              <option value="17.6805,74.0183,Satara">Satara (Karad)</option>
+              <option value="16.7050,74.2433,Kolhapur">Kolhapur (Shirol)</option>
+              <option value="21.1458,79.0882,Nagpur">Nagpur (Vidarbha)</option>
+            </select>
+          </div>
+
+          <button class="btn-primary" style="width:100%; margin-top:8px;" onclick="completeLogin()">
+            <span id="t-btn-login">Sign In & Fetch Live Farm Data →</span>
+          </button>
+
+          <div style="display:flex; justify-content:space-between; margin-top:16px; font-size:0.82rem;">
+            <a style="color:var(--teal); font-weight:700; cursor:pointer;" onclick="navigateTo('landing')">← Back to Starting Page</a>
+            <a style="color:var(--teal); font-weight:700; cursor:pointer;" onclick="useDeviceGPSAndLogin()">📍 Use My Live GPS Location</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       SCREEN 3: FARMER DASHBOARD (MAIN APPLICATION)
+       ======================================================================== -->
+  <section class="screen-view" id="screen-dashboard">
+    <div class="dashboard-layout">
+
+      <!-- DESKTOP DEEP-TEAL SIDEBAR -->
+      <aside class="desktop-sidebar">
+        <div>
+          <div class="sidebar-logo" onclick="navigateTo('landing')">
+            <span class="brand-drop">💧</span> TerraFlow
+          </div>
+          <ul class="nav-list">
+            <li class="nav-link active" onclick="jumpSection('sec-result', this)">📊 <span class="t-nav-overview">Overview & Advice</span></li>
+            <li class="nav-link" onclick="jumpSection('sec-setup', this)">🚜 <span class="t-nav-setup">Farm Setup</span></li>
+            <li class="nav-link" onclick="jumpSection('sec-manual', this)">🛠️ <span class="t-nav-manual">Manual Field Update</span></li>
+            <li class="nav-link" onclick="jumpSection('sec-charts', this)">🌦️ <span class="t-nav-charts">Live Weather & Charts</span></li>
+            <li class="nav-link" onclick="jumpSection('sec-methods', this)">💧 <span class="t-nav-methods">Method Comparison</span></li>
+            <li class="nav-link" onclick="jumpSection('sec-ai', this)">🎙️ <span class="t-nav-ai">Nugen AI Chat</span></li>
+            <li class="nav-link" onclick="jumpSection('sec-feedback', this)">⭐ <span class="t-nav-feedback">Farmer Feedback</span></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="sidebar-live-box">
+            <div style="font-weight:800; color:var(--mint); margin-bottom:4px;" id="sidebar-api-status">
+              🟢 Live Open-Meteo Active
+            </div>
+            <div id="sidebar-sync-time" style="opacity:0.9;">
+              Open-Meteo forecast + FAO-56 balance.
+            </div>
+            <button class="btn-outline" style="width:100%; margin-top:10px; padding:7px 10px; font-size:0.75rem;" onclick="openNugenModal()">
+              🔗 Configure Nugen AI API
+            </button>
+            <button class="btn-outline" style="width:100%; margin-top:6px; padding:7px 10px; font-size:0.75rem; background:transparent; color:#fff; border-color:rgba(255,255,255,0.3);" onclick="navigateTo('login')">
+              🚪 Switch Farmer / Sign Out
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN DASHBOARD WORKSPACE -->
+      <main class="dash-content">
+
+        <!-- TOP BAR -->
+        <header class="dash-header">
+          <div>
+            <h2 style="font-size:1.45rem; font-weight:800; color:var(--deep-teal);" id="dash-greeting">
+              Namaste, Ramesh Patil 👋
+            </h2>
+            <p style="font-size:0.84rem; color:var(--muted); font-weight:600;" id="dash-sub-location">
+              Location: Nashik (19.99°N, 73.78°E) • Open-Meteo forecast + soil profile
+            </p>
+          </div>
+
+          <div class="header-controls">
+            <span class="live-weather-pill" id="live-status-badge">
+              🛰️ Live Online Weather Synced
+            </span>
+            <select class="input-control" style="width:auto; padding:8px 12px;" id="dash-lang" onchange="changeLanguage(this.value)">
+              <option value="en">English (EN)</option>
+              <option value="mr">मराठी (Marathi)</option>
+              <option value="hi">हिंदी (Hindi)</option>
+            </select>
+            <button class="btn-teal" onclick="speakRecommendationAloud()" id="btn-top-speak">
+              🔊 <span id="t-btn-listen">Listen Audio</span>
+            </button>
+            <button class="btn-outline" style="padding:8px 12px; font-size:0.8rem;" onclick="openNugenModal()">
+              🤖 Nugen AI Key
+            </button>
+          </div>
+        </header>
+
+        <!-- INTERACTIVE PROGRESS BANNER (SHOWS ON UPDATE) -->
+        <div class="update-progress-banner" id="update-banner">
+          <span id="update-banner-text">🔄 Syncing live Open-Meteo data & recalculating FAO-56 water balance...</span>
+        </div>
+
+        <!-- TOP 4 LIVE METRIC CARDS -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-top">
+              <span id="t-kpi-moist">Root-Zone Soil Moisture</span>
+              <span class="info-tip" data-tip="Soil moisture estimated by the FAO-56 water-balance model, or your own sensor/soil-feel input if you entered one.">?</span>
+            </div>
+            <div class="metric-big">
+              <span id="val-moist">31</span><span class="metric-unit">%</span>
+            </div>
+            <div class="liquid-bar">
+              <div class="liquid-fill" id="bar-moist" style="width: 55%;"></div>
+            </div>
+            <small style="font-size:0.75rem; color:var(--muted); font-weight:600;" id="sub-moist">
+              Source: FAO-56 water balance (model estimate)
+            </small>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top">
+              <span id="t-kpi-temp">Live Temperature & Humidity</span>
+              <span class="info-tip" data-tip="Real-time 2m air temperature and relative humidity from the Open-Meteo forecast.">?</span>
+            </div>
+            <div class="metric-big">
+              <span id="val-temp">31.4</span><span class="metric-unit">°C</span>
+            </div>
+            <div class="liquid-bar">
+              <div class="liquid-fill" id="bar-temp" style="width: 62%; background:var(--sun);"></div>
+            </div>
+            <small style="font-size:0.75rem; color:var(--muted); font-weight:600;" id="sub-temp">
+              Humidity: 48% • Wind: 11 km/h
+            </small>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top">
+              <span id="t-kpi-rain">48-Hr Rain Forecast & Prob.</span>
+              <span class="info-tip" data-tip="Forecast 48-hour cumulative rainfall (mm) and maximum precipitation probability (%).">?</span>
+            </div>
+            <div class="metric-big">
+              <span id="val-rain-prob">12</span><span class="metric-unit">%</span>
+            </div>
+            <div class="liquid-bar">
+              <div class="liquid-fill" id="bar-rain" style="width: 12%; background:var(--teal);"></div>
+            </div>
+            <small style="font-size:0.75rem; color:var(--muted); font-weight:600;" id="sub-rain">
+              Expected Rain (48h): 0.0 mm
+            </small>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top">
+              <span id="t-kpi-et">Evapotranspiration (ET₀ & ETc)</span>
+              <span class="info-tip" data-tip="FAO-56 Penman-Monteith Reference ET₀ multiplied by Crop Stage Coefficient (Kc).">?</span>
+            </div>
+            <div class="metric-big">
+              <span id="val-et0">5.1</span><span class="metric-unit">mm/day</span>
+            </div>
+            <div class="liquid-bar">
+              <div class="liquid-fill" id="bar-et" style="width: 68%;"></div>
+            </div>
+            <small style="font-size:0.75rem; color:var(--muted); font-weight:600;" id="sub-et">
+              Crop ETc: 5.86 mm/day (Kc: 1.15)
+            </small>
+          </div>
+        </div>
+
+        <!-- LARGE INTERACTIVE IRRIGATION RECOMMENDATION RESULT CARD -->
+        <div class="recommendation-hero" id="sec-result">
+          <div>
+            <div class="updated-badge" id="result-status-badge">
+              ✨ LIVE RESULT • BASED ON LATEST FORECAST
+            </div>
+            <h3 class="rec-main-action" id="res-action-title">Irrigate Today</h3>
+
+            <div class="rec-stats-strip">
+              <span class="rec-depth-val" id="res-water-mm">22 mm (1,78,000 L)</span>
+              <span style="font-size:1rem; font-weight:700; color:var(--ink);" id="res-pump-time">
+                ⏱️ Pump Runtime: 118 mins (Best slot: 6:00 AM – 8:00 AM)
+              </span>
+            </div>
+
+            <!-- Interactive Delta Summary (Shows exactly what changed after farmer updates inputs!) -->
+            <div class="rec-delta-banner" id="res-delta-box">
+              📊 Active Calculation: 3-day cumulative crop demand (ETc) minus effective rain & manual soil adjustments.
+            </div>
+
+            <div class="rec-explanation-card">
+              <div style="font-size:0.76rem; font-weight:800; color:var(--teal); text-transform:uppercase; margin-bottom:4px;" id="t-ai-exp-header">
+                🧠 Nugen AI Explanation (Grounded in Live Weather & FAO-56):
+              </div>
+              <div id="res-explanation-text">
+                Loading live agronomic explanation...
+              </div>
+
+              <!-- Multi-Language Audio Controls -->
+              <div class="audio-bar">
+                <button class="btn-audio-speak" id="btn-card-speak" onclick="speakRecommendationAloud()">
+                  🔊 <span id="t-speak-rec">Hear Advice in Selected Language</span>
+                </button>
+                <button class="btn-outline" style="padding:7px 14px; font-size:0.8rem;" onclick="stopAudio()">
+                  ⏹️ Stop Audio
+                </button>
+                <button class="btn-outline" style="padding:7px 14px; font-size:0.8rem;" onclick="shareViaWhatsApp()">
+                  💬 WhatsApp / SMS
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="rec-trust-panel">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--muted); text-transform:uppercase;">
+              Recommendation Confidence
+            </div>
+            <div style="font-size:1.65rem; font-weight:800; color:var(--deep-teal); margin:4px 0;" id="res-conf-score">
+              92% (High)
+            </div>
+            <div class="liquid-bar" style="margin:8px 0;">
+              <div class="liquid-fill" id="bar-conf" style="width:92%;"></div>
+            </div>
+            <p style="font-size:0.78rem; color:var(--muted); font-weight:600; margin-bottom:12px;" id="res-conf-reason">
+              Calculating confidence…
+            </p>
+            <div style="background:var(--snow); padding:10px; border-radius:10px; border:1px solid var(--border); font-size:0.8rem; font-weight:700; color:var(--deep-teal);" id="res-savings-pill">
+              💧 Calculating savings…
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 1: SIMPLE FARM SETUP (CROPS, LOCATION, SOWING DATE, SOIL, AREA, METHOD) -->
+        <div class="section-card" id="sec-setup">
+          <div class="section-header">
+            <div>
+              <h3 id="t-sec-setup-title">🚜 1. Farm Setup & Live Weather Station</h3>
+              <p style="font-size:0.82rem; color:var(--muted);">
+                Change location or crop details below—live weather and FAO-56 crop stage ($K_c$) update automatically.
+              </p>
+            </div>
+            <button class="btn-outline" style="padding:8px 14px; font-size:0.8rem;" onclick="fetchGPSWeather()">
+              📍 Use My Exact GPS Coordinates
+            </button>
+          </div>
+
+          <div class="form-grid-4">
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;" id="t-lbl-dist">District / Live Weather Station</label>
+              <select class="input-control" id="inp-station" onchange="onStationChange()">
+                <option value="18.5204,73.8567,Pune">Pune (Haveli / Baramati)</option>
+                <option value="19.9975,73.7898,Nashik" selected>Nashik (Niphad / Lasalgaon)</option>
+                <option value="19.3919,74.6487,Rahuri (Ahilyanagar)">Rahuri / Ahilyanagar (MPKV)</option>
+                <option value="17.6805,74.0183,Satara">Satara (Karad)</option>
+                <option value="16.7050,74.2433,Kolhapur">Kolhapur (Shirol)</option>
+                <option value="21.1458,79.0882,Nagpur">Nagpur (Vidarbha)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;" id="t-lbl-crop">Crop (ICAR / FAO-56 Calibrated)</label>
+              <select class="input-control" id="inp-crop" onchange="triggerInteractiveUpdate('Crop changed')">
+                <option value="wheat">Wheat (गहू / गेहूं)</option>
+                <option value="onion">Onion (कांदा / प्याज)</option>
+                <option value="tomato">Tomato (टोमॅटो / टमाटर)</option>
+                <option value="sugarcane">Sugarcane (ऊस / गन्ना)</option>
+                <option value="soybean">Soybean (सोयाबीन)</option>
+                <option value="cotton">Cotton (कापूस / कपास)</option>
+                <option value="chickpea">Chickpea / Gram (हरभरा / चना)</option>
+                <option value="rice">Rice / Paddy (भात / धान)</option>
+                <option value="maize">Maize (मका / मक्का)</option>
+                <option value="groundnut">Groundnut (भुईमूग / मूंगफली)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;" id="t-lbl-sowing">Sowing Date (पेरणीची तारीख)</label>
+              <input type="date" class="input-control" id="inp-sowing" value="2026-09-25" onchange="triggerInteractiveUpdate('Sowing date updated')" />
+            </div>
+
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;" id="t-lbl-soil">Soil Type (जमिनीचा प्रकार)</label>
+              <select class="input-control" id="inp-soil" onchange="triggerInteractiveUpdate('Soil profile updated')">
+                <option value="loam">Loamy Soil (मध्यम पोयटा)</option>
+                <option value="clay_black" selected>Black Cotton Soil (काळी कसदार जमीन)</option>
+                <option value="sandy_loam">Sandy Loam (हलकी मुरमाड)</option>
+                <option value="clay_loam">Clay Loam (चिकणमाती)</option>
+                <option value="sand">Sandy Soil (वाळूमय)</option>
+                <option value="silt_loam">Silt Loam (गाळमिश्रित पोयटा)</option>
+                <option value="red_sandy_loam">Red Sandy Loam (लाल मुरमाड)</option>
+                <option value="alluvial">Alluvial Soil (गाळाची जमीन)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;" id="t-lbl-area">Farm Area (Acres / एकर)</label>
+              <input type="number" class="input-control" id="inp-area" value="2.0" min="0.25" max="50" step="0.25" onchange="triggerInteractiveUpdate('Farm area updated')" />
+            </div>
+
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;" id="t-lbl-method">Current Irrigation Method</label>
+              <select class="input-control" id="inp-method" onchange="triggerInteractiveUpdate('Irrigation method updated')">
+                <option value="flood">Flood Irrigation (पाटाने पाणी - 60% eff.)</option>
+                <option value="sprinkler">Sprinkler (तुषार सिंचन - 75% eff.)</option>
+                <option value="drip">Drip Irrigation (ठिबक सिंचन - 90% eff.)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;" id="t-lbl-pump">Pump Capacity (HP)</label>
+              <select class="input-control" id="inp-pump" onchange="triggerInteractiveUpdate('Pump HP updated')">
+                <option value="3">3 HP (~12,500 L/hr)</option>
+                <option value="5" selected>5 HP (~21,000 L/hr)</option>
+                <option value="7.5">7.5 HP (~30,000 L/hr)</option>
+                <option value="10">10 HP (~38,000 L/hr)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;">Auto-Detected Crop Stage</label>
+              <input type="text" class="input-control" id="out-stage-info" value="Mid-Stage (Day 45 • Kc 1.15)" readonly style="background:var(--aqua); color:var(--deep-teal);" />
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: EXPANDED MANUAL FIELD UPDATE (8 FARMER OVERRIDES + INTERACTIVE RESULT) -->
+        <div class="section-card" id="sec-manual">
+          <div class="section-header">
+            <div>
+              <h3 id="t-sec-manual-title">🛠️ 2. Manual Field Update (Override Sensor / Weather Conditions)</h3>
+              <p style="font-size:0.82rem; color:var(--muted);" id="t-sec-manual-desc">
+                Report real conditions from your field if local rain, soil feel, crop stress, or power timings differ. Clicking Update will recalculate and jump to your new result!
+              </p>
+            </div>
+            <button class="btn-outline" style="padding:7px 14px; font-size:0.78rem;" onclick="resetManualOverrides()">
+              ↺ Reset to Default
+            </button>
+          </div>
+
+          <div class="form-grid-4">
+            <!-- Manual Option 1: Observed Local Rain -->
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;">1. Local Rain in Last 24h (mm)</label>
+              <input type="number" class="input-control" id="man-rain" value="0" min="0" max="200" step="1" />
+            </div>
+
+            <!-- Manual Option 2: Visual / Hand-Feel Soil Check -->
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;">2. Visual / Hand-Feel Soil Check</label>
+              <select class="input-control" id="man-soil-feel">
+                <option value="auto">Use Model Estimate / Sensor Value</option>
+                <option value="dry_cracked">Dry, Dusty or Surface Cracks (~16%)</option>
+                <option value="slightly_moist">Slightly Cool & Crumbling (~26%)</option>
+                <option value="good_ball">Forms Firm Moist Ball (~34%)</option>
+                <option value="wet_sticky">Wet & Sticky / Waterlogged (~45%)</option>
+              </select>
+            </div>
+
+            <!-- Manual Option 3: Direct Sensor Moisture % -->
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;">3. Soil Moisture Sensor (% Optional)</label>
+              <input type="number" class="input-control" id="man-sensor" placeholder="e.g. 24 (Leave blank if no sensor)" min="5" max="60" />
+            </div>
+
+            <!-- Manual Option 4: Days Since Last Watering -->
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;">4. Days Since Last Irrigation</label>
+              <select class="input-control" id="man-days-last">
+                <option value="1">1 Day ago (Yesterday)</option>
+                <option value="2">2 Days ago</option>
+                <option value="3" selected>3 Days ago</option>
+                <option value="5">5 Days ago</option>
+                <option value="7">7+ Days ago (Dry spell)</option>
+              </select>
+            </div>
+
+            <!-- Manual Option 5: Visual Crop Leaf Stress -->
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;">5. Observed Crop Leaf Condition</label>
+              <select class="input-control" id="man-crop-stress">
+                <option value="normal" selected>Healthy & Normal Leaves</option>
+                <option value="mild_wilt">Mild Afternoon Leaf Drooping (+10% water)</option>
+                <option value="heat_roll">Severe Leaf Curling / Heat Stress (+20% water)</option>
+                <option value="yellow_wet">Lower Leaf Yellowing / Excess Moisture (-30%)</option>
+              </select>
+            </div>
+
+            <!-- Manual Option 6: Mulching / Soil Cover -->
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;">6. Soil Mulching / Trash Cover</label>
+              <select class="input-control" id="man-mulch">
+                <option value="none" selected>Bare Soil (No Mulch)</option>
+                <option value="organic">Crop Residue / Sugarcane Trash (-15% Evap)</option>
+                <option value="plastic">Plastic Mulch Sheet (-25% Evap)</option>
+              </select>
+            </div>
+
+            <!-- Manual Option 7: Electricity 3-Phase Rotation -->
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;">7. Electricity / Pump Power Slot</label>
+              <select class="input-control" id="man-power-slot">
+                <option value="day" selected>3-Phase Morning Slot (6:00 AM – 10:00 AM)</option>
+                <option value="night">3-Phase Night Slot (10:00 PM – 5:00 AM)</option>
+                <option value="solar">Solar Pump Window (8:30 AM – 4:00 PM)</option>
+                <option value="afternoon">Afternoon Grid Slot (12:00 PM – 4:00 PM)</option>
+              </select>
+            </div>
+
+            <!-- Manual Option 8: Well / Borewell Water Level -->
+            <div>
+              <label style="font-size:0.78rem; font-weight:700;">8. Well / Canal Water Availability</label>
+              <select class="input-control" id="man-water-avail">
+                <option value="1.0" selected>Full Water Available (100% Refill)</option>
+                <option value="0.75">Moderate Well Level (75% Regulated Deficit)</option>
+                <option value="0.50">Low Borewell / Drought Survival Mode (50%)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+            <button class="btn-primary" onclick="triggerInteractiveUpdate('Manual field conditions updated by farmer', true)" id="btn-apply-manual">
+              🔄 Update & Show Irrigation Result ↑
+            </button>
+            <span style="font-size:0.82rem; color:var(--muted); font-weight:600;">
+              Clicking Update recalculates your water balance and scrolls up to highlight your new recommendation.
+            </span>
+          </div>
+        </div>
+
+        <!-- SECTION 3: AQUA CHART PANELS (SEPARATE LABELS FOR SOIL MOISTURE, RAINFALL & IRRIGATION) -->
+        <div class="aqua-charts-box" id="sec-charts">
+          <div class="section-header" style="margin-bottom:6px;">
+            <div>
+              <h3 style="color:var(--deep-teal);">🌦️ 3. Live 4-Day Forecast & Water Balance Charts</h3>
+              <p style="font-size:0.8rem; color:var(--deep-teal); opacity:0.85;">
+                Distinguishes Soil Moisture (%), Live Open-Meteo Rainfall Forecast (mm), and Recommended Irrigation (mm)
+              </p>
+            </div>
+            <button class="btn-teal" style="padding:7px 14px; font-size:0.78rem;" onclick="fetchLiveOpenMeteoWeather(true)">
+              🔄 Refresh Live Online Weather
+            </button>
+          </div>
+
+          <div class="charts-3col">
+            <div class="chart-mini-card">
+              <h4><span>1. Soil Moisture Trend (%)</span> <span style="color:var(--teal);">Root Zone</span></h4>
+              <div id="chart-moisture-rows"></div>
+            </div>
+
+            <div class="chart-mini-card">
+              <h4><span>2. Live Rain Forecast (mm)</span> <span style="color:#B5891C;">Open-Meteo</span></h4>
+              <div id="chart-rain-rows"></div>
+            </div>
+
+            <div class="chart-mini-card">
+              <h4><span>3. Planned Irrigation (mm)</span> <span style="color:var(--deep-teal);">FAO-56 Schedule</span></h4>
+              <div id="chart-irrig-rows"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: IRRIGATION METHOD COMPARISON (FLOOD VS SPRINKLER VS DRIP) -->
+        <div class="section-card" id="sec-methods">
+          <div class="section-header">
+            <div>
+              <h3>💧 4. Irrigation Method Comparison (Flood vs. Sprinkler vs. Drip)</h3>
+              <p style="font-size:0.82rem; color:var(--muted);">
+                Objective comparison of water volume, pump runtime, and energy consumption for your <strong id="comp-area-lbl">2.0 Acre</strong> farm
+              </p>
+            </div>
+            <span style="font-size:0.78rem; font-weight:800; color:var(--teal); background:var(--aqua); padding:5px 12px; border-radius:999px;">
+              Subsidy may be available (PMKSY) — check with your agriculture office
+            </span>
+          </div>
+
+          <div class="table-scroll">
+            <table class="comp-table">
+              <thead>
+                <tr>
+                  <th>Irrigation Method</th>
+                  <th>Field Efficiency</th>
+                  <th>Gross Water Required</th>
+                  <th>Pump Runtime</th>
+                  <th>Electricity Used</th>
+                  <th>Estimated Cost & Benefit Note</th>
+                </tr>
+              </thead>
+              <tbody id="method-comp-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION 5: NUGEN AI VOICE & TEXT ASSISTANT (CONNECTED TO LIVE FARM STATE) -->
+        <div class="section-card" id="sec-ai">
+          <div class="section-header">
+            <div>
+              <h3>🎙️ 5. Ask Kisan Mitra (Nugen AI Connected Assistant)</h3>
+              <p style="font-size:0.82rem; color:var(--muted);">
+                Connected to Nugen AI API + Live Agronomic Context. Speak or type in English, मराठी, or हिंदी.
+              </p>
+            </div>
+            <span id="nugen-conn-pill" style="font-size:0.76rem; font-weight:800; background:var(--aqua); color:var(--deep-teal); padding:5px 12px; border-radius:999px;">
+              🟢 Agronomic AI Active
+            </span>
+          </div>
+
+          <!-- Quick Interactive Questions -->
+          <div class="quick-prompts">
+            <button class="prompt-chip" onclick="askQuickQuestion('Why did you recommend this water amount today?')">
+              ❓ Why this water amount today?
+            </button>
+            <button class="prompt-chip" onclick="changeLanguage('mr'); askQuickQuestion('उद्या पाऊस पडल्यास मी काय करावे?')">
+              🌧️ उद्या पाऊस पडल्यास काय करावे? (Marathi)
+            </button>
+            <button class="prompt-chip" onclick="askQuickQuestion('How much water and electricity do I save with Drip vs Flood?')">
+              ⚡ Drip vs Flood savings for my plot?
+            </button>
+            <button class="prompt-chip" onclick="askQuickQuestion('What is the best time to run my pump to reduce evaporation?')">
+              ☀️ Best pump timing for heat stress?
+            </button>
+          </div>
+
+          <div class="chat-messages" id="ai-chat-box">
+            <div class="bubble ai">
+              <strong>Nugen AI (Kisan Mitra):</strong> Namaste! I am connected to your live farm setup (<span id="chat-context-summary">Nashik • Wheat • Black Soil</span>). Ask me anything by typing or tapping 🎤 <strong>Speak</strong>, and click 🔊 to hear my answer in Marathi, Hindi, or English!
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn-teal" style="background:var(--coral);" onclick="startVoiceRecognition()" id="btn-mic-chat">
+              🎤 Speak (बोला / बोलें)
+            </button>
+            <input type="text" class="input-control" style="flex:1; min-width:200px;" id="ai-chat-input" placeholder="Ask about your crop, live weather, soil moisture, or irrigation timing..." onkeydown="if(event.key==='Enter') sendNugenChatMessage()" />
+            <button class="btn-primary" style="border-radius:12px; padding:11px 20px;" onclick="sendNugenChatMessage()">
+              Ask Nugen AI →
+            </button>
+            <button class="btn-outline" style="border-radius:12px; padding:11px 16px;" onclick="speakLastAIReply()">
+              🔊 Hear Reply
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 6: FARMER FEEDBACK & FIELD VALIDATION LOOP -->
+        <div class="section-card" id="sec-feedback">
+          <div class="section-header">
+            <div>
+              <h3>⭐ 6. Farmer Feedback & Field Validation Loop</h3>
+              <p style="font-size:0.82rem; color:var(--muted);">
+                Your feedback directly calibrates our soil-water depletion model and confidence score for your farm.
+              </p>
+            </div>
+            <span style="font-size:0.78rem; font-weight:700; color:var(--teal);" id="fb-count-badge">
+              ✔ Model Calibration Active
+            </span>
+          </div>
+
+          <p style="font-size:0.84rem; font-weight:700; margin-bottom:8px;">
+            How matched was today's irrigation advice with your actual field condition?
+          </p>
+          <div class="feedback-tags">
+            <button class="fb-tag selected" onclick="selectFeedbackTag(this, 'accurate')">👍 Advice Was Accurate (+3% Confidence)</button>
+            <button class="fb-tag" onclick="selectFeedbackTag(this, 'still_wet')">🌧️ Soil Was Still Wet (Reduce Next Water by 10%)</button>
+            <button class="fb-tag" onclick="selectFeedbackTag(this, 'too_dry')">☀️ Field Needed More Water (Increase by 10%)</button>
+            <button class="fb-tag" onclick="selectFeedbackTag(this, 'saved_power')">⚡ Saved Pump Hours & Electricity</button>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center;">
+            <input type="text" class="input-control" id="fb-comment" placeholder="Optional note (e.g. 'Top soil dried faster due to afternoon wind')..." />
+            <button class="btn-teal" onclick="submitFarmerFeedback()">
+              ✔ Submit Feedback & Calibrate
+            </button>
+          </div>
+
+          <div id="fb-log-list" style="margin-top:12px; font-size:0.82rem; color:var(--deep-teal); background:var(--snow); padding:10px 14px; border-radius:10px; border:1px solid var(--border);">
+            <strong>Latest Calibration Log:</strong> Waiting for your field feedback to fine-tune local soil retention.
+          </div>
+        </div>
+
+        <!-- DATA & AGRONOMIC DISCLAIMER FOOTER -->
+        <footer style="text-align:center; padding:18px; font-size:0.8rem; color:var(--muted); border-top:1px solid var(--border); margin-top:20px;">
+          <strong>"We support decisions — not promises on water or yield."</strong><br/>
+          <span>Weather: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather data by Open-Meteo.com</a> (CC BY 4.0, forecast model output) • Agronomic Logic: FAO-56 Penman-Monteith with crop coefficients from FAO-56 (see SOURCES.md) • AI Layer: Nugen AI</span>
+        </footer>
+
+      </main>
+    </div>
+
+    <!-- MOBILE STICKY BOTTOM NAVIGATION -->
+    <nav class="mobile-bottom-nav">
+      <button class="mob-nav-btn active" onclick="jumpSection('sec-result', this)"><span>📊</span><span>Result</span></button>
+      <button class="mob-nav-btn" onclick="jumpSection('sec-setup', this)"><span>🚜</span><span>Farm</span></button>
+      <button class="mob-nav-btn" onclick="jumpSection('sec-manual', this)"><span>🛠️</span><span>Update</span></button>
+      <button class="mob-nav-btn" onclick="jumpSection('sec-ai', this)"><span>🎙️</span><span>AI Chat</span></button>
+      <button class="mob-nav-btn" onclick="jumpSection('sec-feedback', this)"><span>⭐</span><span>Feedback</span></button>
+    </nav>
+  </section>
+
+  <!-- ========================================================================
+       MODAL: CONNECT NUGEN AI API CREDENTIALS
+       ======================================================================== -->
+  <div class="modal-backdrop" id="nugen-modal">
+    <div class="modal-box">
+      <h3 style="color:var(--deep-teal); font-size:1.2rem; margin-bottom:6px;">🔗 Connect Nugen AI API</h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:16px;">
+        Nugen AI is connected through the TerraFlow server. The API key is stored in the server's .env file and is never sent to the browser. Used for explanations and chat.
+      </p>
+
+      <div class="form-row">
+        <label>Nugen API Endpoint URL</label>
+        <input type="text" class="input-control" id="cfg-nugen-url" value="https://api.nugen.in/api/v3/chat/completions" />
+      </div>
+
+      <div class="form-row">
+        <label>Nugen API Key (Bearer Token)</label>
+        <input type="password" class="input-control" id="cfg-nugen-key" placeholder="Paste your NUGEN_API_KEY here..." />
+      </div>
+
+      <div class="form-row">
+        <label>Aligned / Base Model Name</label>
+        <input type="text" class="input-control" id="cfg-nugen-model" value="qwen-2.5-7b-instruct" />
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+        <button class="btn-outline" style="padding:9px 18px;" onclick="closeNugenModal()">Cancel</button>
+        <button class="btn-primary" style="padding:9px 20px;" onclick="saveNugenConfig()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       APPLICATION LOGIC: LIVE OPEN-METEO API + FAO-56 + MULTILINGUAL AUDIO + NUGEN AI
+       ======================================================================== -->
+  <script>
+    // 1. All agronomy (crops, soils, FAO-56 maths) runs in the Python engine behind /api.
+    const PUMP_LPH = { "3": 12500, "5": 21000, "7.5": 30000, "10": 38000 };
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    // 2. GLOBAL LIVE STATE
+    let appState = {
+      lang: "en", farmerName: "Ramesh Patil", stationName: "Nashik", lat: 19.9975, lon: 73.7898,
+      liveWeather: { tempC: "--", humidity: "--", windKmh: "--", et0Today: "--", rain48hMm: 0, rainProbMax: 0 },
+      lastNetMm: 0, lastAIReplyText: "", lastReq: null
+    };
+
+    // 3. MULTILINGUAL UI STRINGS
+    const UI_TEXT = {
+      en: {
+        listenBtn: "Listen Audio",
+        speakRec: "Hear Advice in English",
+        irrigateNow: "Irrigate Today",
+        partialIrrig: "Partial Irrigation Today",
+        waitRain: "Do Not Irrigate Today • Wait",
+        checkLater: "Check Soil Again in 6 Hours"
+      },
+      mr: {
+        listenBtn: "आवाजात ऐका",
+        speakRec: "मराठीत सल्ला ऐका",
+        irrigateNow: "आज पाणी द्या (Irrigate Today)",
+        partialIrrig: "अर्धेच पाणी द्या (Partial Irrigation)",
+        waitRain: "आज पाणी देऊ नका • थांबा",
+        checkLater: "६ तासांनंतर पुन्हा ओलावा तपासा"
+      },
+      hi: {
+        listenBtn: "आवाज़ में सुनें",
+        speakRec: "हिंदी में सलाह सुनें",
+        irrigateNow: "आज सिंचाई करें (Irrigate Today)",
+        partialIrrig: "आधी सिंचाई करें (Partial Irrigation)",
+        waitRain: "आज सिंचाई न करें • रुकें",
+        checkLater: "6 घंटे बाद मिट्टी दोबारा जांचें"
+      }
+    };
+
+    // =========================================================================
+    // NAVIGATION & LOGIN FLOW
+    // =========================================================================
+    function navigateTo(screen) {
+      document.querySelectorAll(".screen-view").forEach(s => s.classList.remove("active"));
+      document.getElementById("screen-" + screen).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function quickDemoLogin() {
+      completeLogin();
+    }
+
+    function completeLogin() {
+      const name = document.getElementById("login-name").value.trim() || "Farmer";
+      const locVal = document.getElementById("login-location").value;
+      const parts = locVal.split(",");
+      appState.farmerName = name;
+      appState.lat = parseFloat(parts[0]);
+      appState.lon = parseFloat(parts[1]);
+      appState.stationName = parts[2];
+
+      document.getElementById("inp-station").value = locVal;
+      document.getElementById("dash-greeting").textContent = `Namaste, ${appState.farmerName} 👋`;
+
+      navigateTo("dashboard");
+      fetchLiveOpenMeteoWeather(false);
+    }
+
+    function useDeviceGPSAndLogin() {
+      navigateTo("dashboard");
+      fetchGPSWeather();
+    }
+
+    function jumpSection(secId, navEl) {
+      document.querySelectorAll(".nav-link, .mob-nav-btn").forEach(el => el.classList.remove("active"));
+      if (navEl) navEl.classList.add("active");
+      const target = document.getElementById(secId);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function changeLanguage(lang) {
+      appState.lang = lang;
+      document.getElementById("landing-lang").value = lang;
+      document.getElementById("login-lang").value = lang;
+      document.getElementById("dash-lang").value = lang;
+      document.getElementById("t-btn-listen").textContent = UI_TEXT[lang].listenBtn;
+      document.getElementById("t-speak-rec").textContent = UI_TEXT[lang].speakRec;
+      recalculateAgronomicEngine("Language switched");
+    }
+
+    // =========================================================================
+    // LIVE WEATHER API (OPEN-METEO + FAO-56 ET0 + SOIL)
+    // =========================================================================
+    async function fetchLiveOpenMeteoWeather(showInteractiveBanner = false) {
+      const badge = document.getElementById("live-status-badge");
+      badge.textContent = "🔄 Fetching forecast...";
+      try {
+        const res = await fetch(`/api/weather?lat=${appState.lat}&lon=${appState.lon}`);
+        if (!res.ok) throw new Error("Weather fetch failed");
+        const w = await res.json();
+        const c = w.meta.current || {};
+        document.getElementById("landing-live-preview").textContent =
+          `${appState.stationName}: ${c.temperature_2m ?? "--"}°C • ET₀ ${(w.daily[0] || {}).et0_mm ?? "--"} mm/d` + (w.meta.source !== "live" ? " (" + w.meta.source + ")" : "");
+      } catch (err) {
+        badge.textContent = `🟡 Server not reachable (${appState.stationName})`;
+      }
+      if (showInteractiveBanner) {
+        triggerInteractiveUpdate("Synced with latest forecast", true);
+      } else {
+        recalculateAgronomicEngine("Weather loaded");
+      }
+    }
+
+    function onStationChange() {
+      const val = document.getElementById("inp-station").value;
+      const parts = val.split(",");
+      appState.lat = parseFloat(parts[0]);
+      appState.lon = parseFloat(parts[1]);
+      appState.stationName = parts[2];
+      fetchLiveOpenMeteoWeather(true);
+    }
+
+    function fetchGPSWeather() {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by this browser.");
+        return;
+      }
+      document.getElementById("live-status-badge").textContent = "📍 Locating Farm GPS...";
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          appState.lat = pos.coords.latitude;
+          appState.lon = pos.coords.longitude;
+          appState.stationName = "My Farm GPS";
+          fetchLiveOpenMeteoWeather(true);
+        },
+        () => {
+          alert("Could not access GPS. Using selected district weather station.");
+          fetchLiveOpenMeteoWeather(false);
+        }
+      );
+    }
+
+    // =========================================================================
+    // INTERACTIVE UPDATE ANIMATION & SCROLL TO RESULT
+    // =========================================================================
+    function triggerInteractiveUpdate(reasonText, scrollToResult = false) {
+      const banner = document.getElementById("update-banner");
+      const bannerTxt = document.getElementById("update-banner-text");
+      bannerTxt.textContent = `🔄 Updating: ${reasonText} → Running FAO-56 & Nugen AI...`;
+      banner.classList.add("show");
+
+      setTimeout(async () => {
+        await recalculateAgronomicEngine(reasonText);
+        banner.classList.remove("show");
+
+        const resultCard = document.getElementById("sec-result");
+        resultCard.classList.remove("pulse-updated");
+        void resultCard.offsetWidth; // Reflow to restart animation
+        resultCard.classList.add("pulse-updated");
+
+        if (scrollToResult) {
+          resultCard.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 450);
+    }
+
+    function resetManualOverrides() {
+      document.getElementById("man-rain").value = 0;
+      document.getElementById("man-soil-feel").value = "auto";
+      document.getElementById("man-sensor").value = "";
+      document.getElementById("man-days-last").value = "3";
+      document.getElementById("man-crop-stress").value = "normal";
+      document.getElementById("man-mulch").value = "none";
+      document.getElementById("man-power-slot").value = "day";
+      document.getElementById("man-water-avail").value = "1.0";
+      triggerInteractiveUpdate("Reset to default parameters", true);
+    }
+
+    // =========================================================================
+    // CORE FAO-56 AGRONOMIC ENGINE + MANUAL OVERRIDES
+    // =========================================================================
+    function buildRequest() {
+      const g = id => document.getElementById(id).value;
+      const sensor = g("man-sensor").trim();
+      return {
+        crop_id: g("inp-crop"), soil_id: g("inp-soil"), irrigation_method: g("inp-method"),
+        area_value: parseFloat(g("inp-area")) || 2, pump_hp: parseFloat(g("inp-pump")), pump_discharge_lph: PUMP_LPH[g("inp-pump")],
+        latitude: appState.lat, longitude: appState.lon, language: appState.lang, sowing_date: g("inp-sowing"),
+        observed_rain_mm: parseFloat(g("man-rain")) || 0, soil_feel: g("man-soil-feel"),
+        sensor_moisture_pct: sensor === "" ? null : parseFloat(sensor),
+        days_since_irrigation: parseInt(g("man-days-last")) || 3, crop_stress: g("man-crop-stress"),
+        mulch: g("man-mulch"), power_slot: g("man-power-slot"), water_avail_factor: parseFloat(g("man-water-avail")) || 1.0
+      };
+    }
+
+    async function postJSON(url, body) {
+      const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message ? `${data.field}: ${data.message}` : `Server error ${res.status}`);
+      return data;
+    }
+
+    function setText(id, t) { document.getElementById(id).textContent = t; }
+
+    async function recalculateAgronomicEngine(updateReason = "") {
+      const prevMm = appState.lastNetMm;
+      const lang = appState.lang;
+      const req = buildRequest();
+      appState.lastReq = req;
+      let r;
+      try {
+        r = await postJSON("/api/advice", { ...req, with_ai: true });
+      } catch (e) {
+        setText("result-status-badge", "⚠️ " + e.message);
+        return;
+      }
+      const w = r.weather;
+      appState.stationNameShown = appState.stationName;
+      appState.liveWeather = { tempC: w.temp_c ?? "--", humidity: w.humidity ?? "--", windKmh: w.wind_kmh ?? "--",
+                               et0Today: w.et0_today, rain48hMm: w.rain_48h_mm, rainProbMax: w.rain_prob_max };
+      appState.lastNetMm = r.net_mm;
+
+      // weather badge (always says where the numbers came from)
+      const badge = document.getElementById("live-status-badge");
+      badge.textContent = w.source === "live" ? `🟢 Live Open-Meteo forecast: ${appState.stationName} (${w.temp_c ?? "--"}°C)`
+        : w.source === "cached" ? `🟡 Saved forecast (fetched ${w.retrieved_at}) - live data unavailable`
+        : "🟠 DEMO DATA - live weather unavailable";
+      setText("dash-sub-location", `Station: ${appState.stationName} (${appState.lat.toFixed(2)}°N, ${appState.lon.toFixed(2)}°E) • Open-Meteo forecast (model output) + FAO-56`);
+
+      // stage + KPI cards
+      document.getElementById("out-stage-info").value = `${r.stage.label} (Day ${r.stage.das ?? "-"} • Kc ${r.stage.kc})`;
+      setText("val-moist", r.moisture.pct);
+      document.getElementById("bar-moist").style.width = `${Math.min(100, r.moisture.pct * 2)}%`;
+      setText("sub-moist", `Source: ${r.moisture.source}`);
+      setText("val-temp", w.temp_c ?? "--");
+      setText("sub-temp", `Humidity: ${w.humidity ?? "--"}% • Wind: ${w.wind_kmh ?? "--"} km/h`);
+      setText("val-rain-prob", w.rain_prob_max);
+      document.getElementById("bar-rain").style.width = `${w.rain_prob_max}%`;
+      setText("sub-rain", `Forecast (48h): ${w.rain_48h_mm} mm | Manual: ${req.observed_rain_mm} mm`);
+      setText("val-et0", w.et0_today);
+      setText("sub-et", `Crop ETc: ${w.etc_today} mm/day (${r.inputs_used.crop} Kc ${r.stage.kc})`);
+
+      // result card
+      const actionMap = { irrigate: UI_TEXT[lang].irrigateNow, wait: UI_TEXT[lang].waitRain, check: UI_TEXT[lang].checkLater };
+      setText("res-action-title", actionMap[r.decision]);
+      setText("res-water-mm", `${r.gross_mm} mm (${r.liters.toLocaleString('en-IN')} L)`);
+      setText("res-pump-time", `⏱️ Pump Runtime: ${r.pump_minutes} mins • Slot: ${r.best_slot}`);
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setText("result-status-badge", `✨ UPDATED AT ${timeStr} • ${updateReason.toUpperCase()}`);
+      const diff = Math.round((r.net_mm - prevMm) * 10) / 10;
+      setText("res-delta-box", diff !== 0
+        ? `🔄 Update Result: Net crop water requirement changed from ${prevMm} mm → ${r.net_mm} mm (${diff > 0 ? '+' : ''}${diff} mm) based on your latest inputs.`
+        : `📊 Active Calculation: ${r.reason}`);
+      setText("res-conf-score", `${r.confidence.score}% (${r.confidence.label})`);
+      setText("res-conf-reason", (r.confidence.reasons || []).join(" "));
+      const sv = r.savings || {};
+      setText("res-savings-pill", (typeof sv.water_savings_pct === "number")
+        ? `💧 ${sv.water_savings_pct >= 0 ? "Uses " + Math.abs(sv.water_savings_pct) + "% less water" : "Uses " + Math.abs(sv.water_savings_pct) + "% more water"} than an assumed fixed schedule (illustrative)`
+        : "💧 Savings comparison not available");
+      document.getElementById("bar-conf").style.width = `${r.confidence.score}%`;
+
+      // Nugen explanation, labelled
+      const ex = r.ai.explanation;
+      setText("res-explanation-text", ex.text);
+      appState.lastAIReplyText = ex.text;
+      const expEl = document.getElementById("res-explanation-text");
+      let tag = document.getElementById("res-ai-badge");
+      if (!tag) { tag = document.createElement("div"); tag.id = "res-ai-badge"; tag.style.cssText = "font-size:0.74rem;font-weight:700;color:var(--teal);margin-top:6px;"; expEl.after(tag); }
+      tag.textContent = ex.ai.used ? `✨ Generated by Nugen AI (${ex.ai.model || "model"}) • ${ex.ai.latency_ms} ms • numbers verified against the engine` : `⚠️ ${ex.ai.note}`;
+
+      setText("chat-context-summary", `${appState.stationName} • ${r.inputs_used.crop} (${r.stage.label}) • ${r.moisture.pct}% Soil Moisture • ${r.gross_mm} mm Advice`);
+      renderFourDayCharts(r.charts);
+      renderMethodComparisonTable(r.methods, req.area_value, r.inputs_used.method);
+    }
+
+    function renderFourDayCharts(c) {
+      const days = ["Today", "Day 2", "Day 3", "Day 4"];
+      const rows = (id, arr, unit, color, k) => {
+        document.getElementById(id).innerHTML = arr.map((v, i) => `
+          <div class="chart-bar-line">
+            <span class="d-name">${days[i]}</span>
+            <div class="chart-track"><div class="chart-fill" style="width:${Math.min(100, v * k)}%; background:${color};"></div></div>
+            <span>${v}${unit}</span>
+          </div>`).join("");
+      };
+      rows("chart-moisture-rows", c.moisture_pct, "%", "var(--teal)", 2.1);
+      rows("chart-rain-rows", c.rain_mm, " mm", "var(--sun)", 4);
+      rows("chart-irrig-rows", c.irrigation_mm, " mm", "var(--deep-teal)", 2.5);
+    }
+
+    function renderMethodComparisonTable(methods, areaAcres, activeMethod) {
+      document.getElementById("comp-area-lbl").textContent = `${areaAcres} Acre`;
+      const meta = {
+        flood: ["Flood Irrigation (पाटाने पाणी)", "₹0 new equipment cost; higher seepage loss"],
+        sprinkler: ["Sprinkler Irrigation (तुषार सिंचन)", "Saves water & power vs flood"],
+        drip: ["Drip Irrigation (ठिबक सिंचन)", "Highest efficiency; lowest water & power use"]
+      };
+      const tbody = document.getElementById("method-comp-tbody");
+      tbody.innerHTML = "";
+      methods.forEach(m => {
+        const tr = document.createElement("tr");
+        if (m.id === activeMethod) tr.className = "selected-method";
+        tr.innerHTML = `
+          <td>${meta[m.id][0]} ${m.id === activeMethod ? '⭐ (Selected)' : ''}</td>
+          <td>${m.efficiency_pct}%</td>
+          <td>${m.liters.toLocaleString('en-IN')} L (${m.gross_mm} mm)</td>
+          <td>${m.minutes} mins (${(m.minutes / 60).toFixed(1)} hrs)</td>
+          <td>${m.kwh} kWh</td>
+          <td>${meta[m.id][1]}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // =========================================================================
+    // AUDIO IN ALL LANGUAGES (ENGLISH, MARATHI, HINDI) WITH MULTI-VOICE FALLBACK
+    // =========================================================================
+    let activeAudioElement = null;
+
+    function stopAudio() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (activeAudioElement) {
+        activeAudioElement.pause();
+        activeAudioElement = null;
+      }
+      document.getElementById("btn-card-speak").classList.remove("speaking");
+    }
+
+    function speakTextInLanguage(text, langCode) {
+      stopAudio();
+      const btn = document.getElementById("btn-card-speak");
+      btn.classList.add("speaking");
+
+      const targetBCP = langCode === "mr" ? "mr-IN" : langCode === "hi" ? "hi-IN" : "en-IN";
+
+      if ('speechSynthesis' in window) {
+        const voices = window.speechSynthesis.getVoices();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = targetBCP;
+        utterance.rate = 0.95;
+
+        // Match exact regional voice if available, otherwise fallback to Hindi/Indian voice for Devanagari script
+        const matchedVoice = voices.find(v => v.lang.toLowerCase().includes(langCode)) ||
+                             voices.find(v => v.lang.toLowerCase().includes("hi")) ||
+                             voices.find(v => v.lang.toLowerCase().includes("in"));
+        if (matchedVoice) utterance.voice = matchedVoice;
+
+        utterance.onend = () => btn.classList.remove("speaking");
+        utterance.onerror = () => btn.classList.remove("speaking");
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert("Speech synthesis is not supported on this device.");
+        btn.classList.remove("speaking");
+      }
+    }
+
+    function speakRecommendationAloud() {
+      const text = document.getElementById("res-explanation-text").innerText;
+      speakTextInLanguage(text, appState.lang);
+    }
+
+    function speakLastAIReply() {
+      const text = appState.lastAIReplyText || document.getElementById("res-explanation-text").innerText;
+      speakTextInLanguage(text, appState.lang);
+    }
+
+    // =========================================================================
+    // VOICE INPUT (SPEECH-TO-TEXT IN MARATHI, HINDI, ENGLISH)
+    // =========================================================================
+    function startVoiceRecognition() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        alert("Voice microphone works best in Chrome on Android or Desktop.");
+        return;
+      }
+      const rec = new SR();
+      rec.lang = appState.lang === "mr" ? "mr-IN" : appState.lang === "hi" ? "hi-IN" : "en-IN";
+      const micBtn = document.getElementById("btn-mic-chat");
+      micBtn.textContent = "🔴 Listening...";
+      rec.start();
+
+      rec.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("ai-chat-input").value = transcript;
+        micBtn.textContent = "🎤 Speak (बोला / बोलें)";
+        sendNugenChatMessage();
+      };
+      rec.onerror = () => {
+        micBtn.textContent = "🎤 Speak (बोला / बोलें)";
+      };
+      rec.onend = () => {
+        micBtn.textContent = "🎤 Speak (बोला / बोलें)";
+      };
+    }
+
+    // =========================================================================
+    // NUGEN AI API CONNECTOR + CONTEXT-AWARE AGRONOMIC BRAIN
+    // =========================================================================
+    async function refreshNugenStatus() {
+      try {
+        const s = await (await fetch("/api/ai/status")).json();
+        document.getElementById("nugen-conn-pill").textContent = s.configured ? `🟢 Nugen AI connected (${s.model || "model"})` : "🔴 Nugen key missing on server";
+        return s;
+      } catch (e) { return null; }
+    }
+
+    async function openNugenModal() {
+      const s = await refreshNugenStatus();
+      document.getElementById("cfg-nugen-url").value = s && s.endpoint_host ? s.endpoint_host : "";
+      document.getElementById("cfg-nugen-key").value = "";
+      document.getElementById("cfg-nugen-key").placeholder = "Stored securely on the server (.env), never in the browser";
+      document.getElementById("cfg-nugen-model").value = s && s.model ? s.model : "";
+      ["cfg-nugen-url", "cfg-nugen-key", "cfg-nugen-model"].forEach(id => document.getElementById(id).disabled = true);
+      document.getElementById("nugen-modal").classList.add("open");
+    }
+
+    function closeNugenModal() {
+      document.getElementById("nugen-modal").classList.remove("open");
+    }
+
+    function saveNugenConfig() { closeNugenModal(); }
+
+    function askQuickQuestion(q) {
+      document.getElementById("ai-chat-input").value = q;
+      sendNugenChatMessage();
+    }
+
+    async function sendNugenChatMessage() {
+      const inp = document.getElementById("ai-chat-input");
+      const question = inp.value.trim();
+      if (!question) return;
+      const chatBox = document.getElementById("ai-chat-box");
+      chatBox.innerHTML += `<div class="bubble user">${esc(question)}</div>`;
+      inp.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      let replyText = "", note = "";
+      try {
+        const data = await postJSON("/api/ask", { ...buildRequest(), question });
+        replyText = data.text;
+        note = data.ai.used ? `✨ Nugen AI (${data.ai.model || "model"}) • ${data.ai.latency_ms} ms` : `⚠️ ${data.ai.note}`;
+      } catch (e) {
+        replyText = generateContextualAgronomicAnswer(question, {
+          location: appState.stationName, crop: document.getElementById("inp-crop").value,
+          stage: document.getElementById("out-stage-info").value, soilMoisturePct: document.getElementById("val-moist").innerText,
+          tempC: appState.liveWeather.tempC, et0: appState.liveWeather.et0Today, rainForecastMm: appState.liveWeather.rain48hMm,
+          recommendedAction: document.getElementById("res-action-title").innerText,
+          waterAmount: document.getElementById("res-water-mm").innerText, pumpTime: document.getElementById("res-pump-time").innerText
+        }, appState.lang);
+        note = `⚠️ Offline answer (${esc(e.message)})`;
+      }
+      appState.lastAIReplyText = replyText;
+      chatBox.innerHTML += `<div class="bubble ai"><strong>Nugen AI:</strong> ${esc(replyText)}<div style="font-size:0.72rem;opacity:.75;margin-top:4px;">${note}</div></div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function generateContextualAgronomicAnswer(q, ctx, lang) {
+      const lower = q.toLowerCase();
+      if (lower.includes("subsidy") || lower.includes("सबसिडी") || lower.includes("सब्सिडी") || lower.includes("drip") || lower.includes("ठिबक")) {
+        if (lang === "mr") return `ठिबक व तुषार सिंचनासाठी PMKSY अंतर्गत अनुदान मिळू शकते. दर व पात्रता राज्यानुसार बदलतात; कृपया स्थानिक कृषी कार्यालयात चौकशी करा. मी फक्त या शेताच्या सिंचनाची वेळ व प्रमाण सांगू शकतो.`;
+        if (lang === "hi") return `ड्रिप और स्प्रिंकलर के लिए PMKSY के तहत सब्सिडी मिल सकती है। दर और पात्रता राज्य के अनुसार अलग होती है; कृपया स्थानीय कृषि कार्यालय से पूछें। मैं केवल इस खेत की सिंचाई का समय और मात्रा बता सकता हूँ।`;
+        return `Subsidy for drip and sprinkler systems may be available under PMKSY (Per Drop More Crop). Rates and eligibility differ by state, so please check with your local agriculture office. I can only advise on irrigation timing and amount for this field.`;
+      }
+      if (lower.includes("rain") || lower.includes("पाऊस") || lower.includes("बारिश")) {
+        if (lang === "mr") return `सध्या ${ctx.location} साठी पुढील ४८ तासांत ${ctx.rainForecastMm} मिमी पावसाचा अंदाज आहे. जर तुमच्या शेतात १० मिमी पेक्षा जास्त पाऊस पडला, तर 'Manual Field Update' मध्ये नोंद करा—आपले अ‍ॅप लगेच पंप चालवण्याची वेळ कमी करेल.`;
+        if (lang === "hi") return `अभी ${ctx.location} में अगले 48 घंटों में ${ctx.rainForecastMm} मिमी बारिश का पूर्वानुमान है। यदि आपके खेत में बारिश होती है, तो 'Manual Field Update' में दर्ज करें ताकि सिंचाई तुरंत अपडेट हो सके।`;
+        return `Live Open-Meteo data for ${ctx.location} shows ${ctx.rainForecastMm} mm rain expected in the next 48 hours. If local rain exceeds 10 mm on your field, enter it in Section 2 (Manual Field Update) to skip irrigation and avoid waterlogging.`;
+      }
+      if (lower.includes("time") || lower.includes("when") || lower.includes("वेळ") || lower.includes("कब")) {
+        return `At ${ctx.tempC}°C with ET₀ of ${ctx.et0} mm/day, the best irrigation window is early morning (6:00 AM – 9:30 AM) or late evening. Watering before 9:00 AM prevents 15%–20% afternoon wind and heat evaporation loss.`;
+      }
+      // Default grounded explanation of current farm numbers
+      return `For your ${ctx.crop} crop (${ctx.stage}) in ${ctx.location}: current root-zone moisture is ${ctx.soilMoisturePct}% at ${ctx.tempC}°C (ET₀: ${ctx.et0} mm/day). Recommendation: ${ctx.recommendedAction} — ${ctx.waterAmount} (${ctx.pumpTime}).`;
+    }
+
+    // =========================================================================
+    // FARMER FEEDBACK & MODEL CALIBRATION LOOP
+    // =========================================================================
+    let selectedFeedbackType = "accurate";
+
+    function selectFeedbackTag(btn, type) {
+      document.querySelectorAll(".fb-tag").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedFeedbackType = type;
+    }
+
+    function submitFarmerFeedback() {
+      const note = document.getElementById("fb-comment").value.trim();
+      const entry = { at: new Date().toISOString(), type: selectedFeedbackType, note, crop: document.getElementById("inp-crop").value, station: appState.stationName };
+      try {
+        const log = JSON.parse(localStorage.getItem("terraflow_feedback") || "[]");
+        log.push(entry);
+        localStorage.setItem("terraflow_feedback", JSON.stringify(log));
+      } catch (e) { /* storage unavailable: still show the confirmation */ }
+      document.getElementById("fb-log-list").innerHTML =
+        `<strong>Feedback saved (${new Date().toLocaleTimeString()}):</strong> ${esc(selectedFeedbackType.replace("_", " "))} ${note ? `| Note: "${esc(note)}"` : ""} — stored on this device for evaluation; it does not change the recommendation.`;
+      document.getElementById("fb-comment").value = "";
+    }
+
+    async function shareViaWhatsApp() {
+      let msg = "";
+      try {
+        const d = await postJSON("/api/share", buildRequest());
+        msg = d.text;
+      } catch (e) {
+        msg = `💧 TerraFlow Crop Water Advisory (${appState.stationName})\nAction: ${document.getElementById("res-action-title").innerText}\nWater: ${document.getElementById("res-water-mm").innerText}\n${document.getElementById("res-pump-time").innerText}`;
+      }
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+    }
+
+    // Initialize live weather preview on page load
+    window.onload = () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+      }
+      refreshNugenStatus();
+      fetchLiveOpenMeteoWeather(false);
+    };
+  </script>
+</body>
+</html>

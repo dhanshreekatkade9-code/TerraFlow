@@ -1,0 +1,41 @@
+crop_id,crop_name,hindi_name,stage_key,stage_display_name,stage_duration_days,kc,root_depth_m,depletion_fraction_p,critical_stage,description
+wheat,Wheat,गेहूँ,initial,Crown Root / Tillering,20,0.40,0.35,0.55,True,Crown root initiation and tillering; highly sensitive to early water stress
+wheat,Wheat,गेहूँ,development,Stem Elongation / Jointing,30,0.75,0.65,0.55,False,Rapid vegetative growth and tillering development
+wheat,Wheat,गेहूँ,mid_season,Booting / Flowering / Anthesis,40,1.15,1.00,0.55,True,Peak water consumption stage; water stress causes significant yield loss
+wheat,Wheat,गेहूँ,late_season,Grain Filling / Milk-Dough,30,0.40,1.10,0.65,False,Senescence and grain hardening prior to harvest
+rice,Rice (Paddy),धान,initial,Nursery / Transplanting,20,1.05,0.30,0.20,True,Transplanting and seedling establishment in saturated/puddled soil
+rice,Rice (Paddy),धान,development,Tillering to Panicle,30,1.10,0.50,0.20,True,Active tillering and panicle primordia initiation
+rice,Rice (Paddy),धान,mid_season,Heading / Flowering,40,1.20,0.60,0.20,True,Critical reproductive phase requiring continuous shallow water layer
+rice,Rice (Paddy),धान,late_season,Milking / Dough / Ripening,30,0.90,0.60,0.30,False,Drain field 10-14 days before harvest
+cotton,Cotton,कपास,initial,Emergence / Early Vegetative,30,0.40,0.40,0.65,False,Slow initial vegetative growth
+cotton,Cotton,कपास,development,Squaring to Early Flowering,50,0.75,0.90,0.65,False,Square initiation and taproot expansion
+cotton,Cotton,कपास,mid_season,Peak Flowering / Boll Formation,60,1.20,1.40,0.65,True,Peak water demand; moisture stress leads to boll shedding
+cotton,Cotton,कपास,late_season,Boll Opening / Maturation,40,0.65,1.50,0.70,False,Dry conditions required for boll cracking and fiber quality
+maize,Maize,मक्का,initial,Early Vegetative (V1-V6),20,0.40,0.30,0.55,False,Early leaf collar development
+maize,Maize,मक्का,development,Rapid Stem Growth (V8-VT),35,0.80,0.70,0.55,False,Rapid canopy expansion and tassel emergence
+maize,Maize,मक्का,mid_season,Tasseling / Silking / Pollination,40,1.20,1.00,0.55,True,Extreme sensitivity to water deficit; critical for kernel set
+maize,Maize,मक्का,late_season,Dent / Grain Maturity (R4-R6),30,0.60,1.20,0.60,False,Starch accumulation and black layer formation
+sugarcane,Sugarcane,गन्ना,initial,Germination / Sprouting,60,0.45,0.40,0.65,True,Sett germination and tillering; sensitive to moisture
+sugarcane,Sugarcane,गन्ना,development,Canopy Establishment,90,0.85,0.80,0.65,False,Tillering completion and early stalk growth
+sugarcane,Sugarcane,गन्ना,mid_season,Grand Growth Period,150,1.25,1.20,0.65,True,Peak stalk elongation and biomass accumulation
+sugarcane,Sugarcane,गन्ना,late_season,Maturity / Ripening,60,0.75,1.50,0.75,False,Controlled water stress promotes sucrose accumulation
+soybean,Soybean,सोयाबीन,initial,Emergence / Early Vegetative,20,0.40,0.30,0.50,False,Seedling emergence and trifoliate leaf emergence
+soybean,Soybean,सोयाबीन,development,Branching / Pre-bloom,30,0.70,0.60,0.50,False,Rapid leaf area index development
+soybean,Soybean,सोयाबीन,mid_season,Flowering / Pod Development,40,1.15,0.90,0.50,True,Critical phase; drought reduces pod and seed count
+soybean,Soybean,सोयाबीन,late_season,Pod Fill / Maturity,25,0.50,1.00,0.60,False,Seed filling and leaf yellowing
+chickpea,Chickpea (Gram),चना,initial,Seedling / Establishment,20,0.40,0.25,0.50,False,Slow initial vegetative phase
+chickpea,Chickpea (Gram),चना,development,Branching / Canopy Formation,30,0.70,0.50,0.50,False,Secondary branching and root nodulation
+chickpea,Chickpea (Gram),चना,mid_season,Flowering / Podding,40,1.05,0.80,0.50,True,Highly sensitive to moisture stress at anthesis and pod fill
+chickpea,Chickpea (Gram),चना,late_season,Maturity / Senescence,25,0.35,0.90,0.60,False,Pod drying and physiological maturity
+tomato,Tomato,टमाटर,initial,Transplanting / Establishment,25,0.45,0.25,0.40,False,Root establishment following transplanting
+tomato,Tomato,टमाटर,development,Vegetative / Early Flowering,35,0.75,0.50,0.40,False,Branching and flower cluster emergence
+tomato,Tomato,टमाटर,mid_season,Flowering / Fruit Set / Sizing,45,1.15,0.80,0.40,True,Highest water demand; prevents blossom end rot
+tomato,Tomato,टमाटर,late_season,Ripening / Harvesting,30,0.80,0.90,0.50,False,Fruit coloring and progressive harvest
+onion,Onion,प्याज़,initial,Transplanting / Early Growth,20,0.50,0.20,0.35,False,Shallow rooting establishment
+onion,Onion,प्याज़,development,Vegetative / Foliage Growth,35,0.75,0.35,0.35,False,Active leaf blade growth
+onion,Onion,प्याज़,mid_season,Bulb Initiation / Bulbing,45,1.05,0.45,0.35,True,Critical stage; shallow root system vulnerable to water stress
+onion,Onion,प्याज़,late_season,Maturation / Tops Falling,25,0.75,0.50,0.45,False,Withhold irrigation prior to harvest for curing
+groundnut,Groundnut,मूँगफली,initial,Emergence / Early Vegetative,25,0.40,0.30,0.50,False,Seedling emergence and branch initiation
+groundnut,Groundnut,मूँगफली,development,Flowering & Pegging,35,0.75,0.60,0.50,True,Peg penetration into soil requires adequate topsoil moisture
+groundnut,Groundnut,मूँगफली,mid_season,Pod Addition & Development,45,1.15,0.85,0.50,True,Underground pod filling; water stress causes empty pods
+groundnut,Groundnut,मूँगफली,late_season,Pod Maturation,25,0.60,0.90,0.60,False,Foliage yellowing and pod hardening

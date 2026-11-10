@@ -1,0 +1,9 @@
+soil_id,soil_name,hindi_name,field_capacity_pct,wilting_point_pct,available_water_capacity_mm_per_m,infiltration_rate_mm_hr,bulk_density_g_cm3,description
+loam,Loamy Soil,दोमट मिट्टी,31.0,15.0,160.0,15.0,1.40,Balanced mix of sand silt and clay; optimal drainage and water retention for most cereals and vegetables
+clay_black,Black Cotton Soil (Deep Vertisol),काली मिट्टी (रेगुर),40.0,22.0,180.0,4.0,1.25,"High montmorillonite clay content; high swelling/cracking, high water retention, slow infiltration; predominant in Maharashtra and Deccan"
+clay_loam,Clay Loam,चिकनी दोमट मिट्टी,36.0,18.0,180.0,8.0,1.35,Heavy textured soil with strong nutrient and moisture holding capacity
+sandy_loam,Sandy Loam,बलुई दोमट मिट्टी,22.0,10.0,120.0,25.0,1.50,Coarser texture with fast drainage; requires more frequent light irrigations
+sand,Sandy Soil,बलुई / रेतीली मिट्टी,14.0,6.0,80.0,45.0,1.60,Very high permeability and low water storage capacity; common in arid Rajasthan and riverbeds
+silt_loam,Silt Loam,गाद दोमट मिट्टी,33.0,13.0,200.0,12.0,1.35,Fine textured fertile alluvial soil typical of Indo-Gangetic floodplains
+red_sandy_loam,Red Sandy Loam (Alfisol),लाल बलुई मिट्टी,24.0,11.0,130.0,20.0,1.52,Typical of Southern and Central Indian uplands; moderate fertility and good drainage
+alluvial,Alluvial Soil,जलोढ़ मिट्टी,32.0,14.0,180.0,14.0,1.38,Extensively cultivated fertile soil across Northern and coastal river valleys
